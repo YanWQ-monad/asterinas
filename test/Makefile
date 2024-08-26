@@ -106,7 +106,10 @@ $(INITRAMFS)/usr/local:
 $(INITRAMFS)/test:
 	@make --no-print-directory -C apps
 
-$(INITRAMFS)/benchmark: | $(INITRAMFS)/benchmark/bin
+$(INITRAMFS)/benchmark: | $(INITRAMFS)/benchmark/bin $(INITRAMFS)/benchmark/benchmarks
+
+$(INITRAMFS)/benchmark/benchmarks:
+	@mkdir -p $@
 	@cp -rf $(CUR_DIR)/benchmark/* $@
 
 $(INITRAMFS)/benchmark/bin:
@@ -115,8 +118,8 @@ $(INITRAMFS)/benchmark/bin:
 	@cp /usr/local/benchmark/iperf/bin/iperf3 $@
 	@cp /usr/local/benchmark/membench/membench $@
 	@cp /usr/local/benchmark/iozone $@
-	@cp -r /usr/local/benchmark/unixbench $@
-	@cp -r /usr/local/benchmark/lmbench $@
+	@cp /usr/local/benchmark/unixbench/* $@
+	@cp /usr/local/benchmark/lmbench/* $@
 	@cp /usr/local/benchmark/fio/bin/fio $@
 	@cp /usr/local/benchmark/sqlite-speedtest1 $@
 	@cp /usr/local/leveldb/benchmark/db_bench $@
