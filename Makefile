@@ -67,7 +67,7 @@ endif
 
 # If the BENCHMARK is set, we will run the benchmark in the kernel mode.
 ifneq ($(BENCHMARK), none)
-CARGO_OSDK_ARGS += --init-args="/benchmark/common/bench_runner.sh $(BENCHMARK) asterinas"
+CARGO_OSDK_ARGS += --init-args="/benchmark/benchmarks/common/bench_runner.sh $(BENCHMARK) asterinas"
 endif
 
 ifeq ($(INTEL_TDX), 1)
