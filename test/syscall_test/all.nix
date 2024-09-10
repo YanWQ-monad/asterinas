@@ -27,7 +27,9 @@ buildBazelPackage rec {
   # target "bpf" doesn't support "zero-call-used-regs" option
   hardeningDisable = [ "zerocallusedregs" ];
 
-  bazel = bazel_7;
+  # Enable "enableNixHacks" to match `buildBazelPackage`, so we won't build two bazels
+  bazel = (bazel_7.override { enableNixHacks = true; });
+
   bazelTargets = [ "//test/syscalls/..." ];
   bazelBuildFlags = [ "--test_tag_filters=native" ];
   removeRulesCC = false;
@@ -51,7 +53,7 @@ buildBazelPackage rec {
       rm -f "$bazelOut"/java.log "$bazelOut"/java.log.*
     '';
 
-    sha256 = "sha256-V/tBROFkTV+66fsfFslw4zYs/v3pZZkxujFqgkEfUt0=";
+    sha256 = "sha256-xQ5lJX4eXGL5CfsxZa8z16dIsT90oZp/p63QLKO1QXg=";
   };
 
   buildAttrs = {

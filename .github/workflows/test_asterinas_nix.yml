@@ -1,0 +1,124 @@
+name: Test Asterinas
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - flake3
+  # Schedule to run on every day at 22:00 UTC (06:00 Beijing Time)
+  schedule:
+    - cron: '0 22 * * *'
+
+jobs:
+  # lint:
+  #   if: github.event_name == 'push' || github.event_name == 'pull_request'
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install Nix
+  #       uses: DeterminateSystems/nix-installer-action@main
+
+  #     - name: Cache Nix Store
+  #       uses: DeterminateSystems/magic-nix-cache-action@main
+
+  #     - name: Setup Environment using Nix
+  #       uses: rrbutani/use-nix-shell-action@v1
+  #       with:
+  #         extraNixOptions: "-L"
+
+  #     - name: Check
+  #       id: check
+  #       run: make check
+
+  # unit-test:
+  #   if: github.event_name == 'push' || github.event_name == 'pull_request'
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Install Nix
+  #       uses: DeterminateSystems/nix-installer-action@main
+
+  #     - name: Cache Nix Store
+  #       uses: DeterminateSystems/magic-nix-cache-action@main
+
+  #     - name: Setup Environment using Nix
+  #       uses: rrbutani/use-nix-shell-action@v1
+  #       with:
+  #         extraNixOptions: "-L"
+
+  #     - name: Usermode Unit test
+  #       id: usermode_unit_test
+  #       run: make test
+
+  #     - name: Ktest Unit Test
+  #       id: ktest_unit_test
+  #       run: make ktest
+
+  #     # TODO: add component check.
+
+  integration-test:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    continue-on-error: true
+    name: integration-test (Nix)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Cache Nix Store
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Setup Environment using Nix
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          extraNixOptions: "-L"
+
+      - name: SMP Boot Test (Multiboot)
+        id: boot_test_mb
+        run: make run AUTO_TEST=boot BOOT_PROTOCOL=multiboot RELEASE=1 SMP=4
+        continue-on-error: true
+
+      - name: SMP Boot Test (Linux Legacy 32-bit Boot Protocol)
+        id: boot_test_linux_legacy32
+        run: make run AUTO_TEST=boot BOOT_PROTOCOL=linux-legacy32 RELEASE=1 SMP=4
+        continue-on-error: true
+
+      - name: Syscall Test (Linux EFI Handover Boot Protocol) (Debug Build)
+        id: syscall_test
+        run: make run AUTO_TEST=syscall BOOT_PROTOCOL=linux-efi-handover64 RELEASE=0
+        continue-on-error: true
+
+      - name: Syscall Test at Ext2 (MicroVM)
+        id: syscall_test_at_ext2
+        run: make run AUTO_TEST=syscall SYSCALL_TEST_DIR=/ext2 SCHEME=microvm RELEASE=1
+        continue-on-error: true
+
+      - name: Syscall Test at Exfat (Multiboot2) (without KVM enabled)
+        id: syscall_test_at_exfat_linux
+        run: |
+          make run AUTO_TEST=syscall \
+            SYSCALL_TEST_DIR=/exfat EXTRA_BLOCKLISTS_DIRS=blocklists.exfat \
+            BOOT_PROTOCOL=multiboot2 RELEASE=1
+        continue-on-error: true
+
+      - name: SMP Syscall Test (Multiboot2)
+        id: smp_syscall_test_mb2
+        run: make run AUTO_TEST=syscall BOOT_PROTOCOL=multiboot2 RELEASE=1 SMP=4
+        continue-on-error: true
+
+      - name: General Test (Linux EFI Handover Boot Protocol)
+        id: test_linux
+        run: make run AUTO_TEST=test BOOT_PROTOCOL=linux-efi-handover64 RELEASE=1
+        continue-on-error: true
+
+      - name: SMP General Test (Multiboot2)
+        id: smp_test_mb2
+        run: make run AUTO_TEST=test BOOT_PROTOCOL=multiboot2 RELEASE=1 SMP=4
+        continue-on-error: true

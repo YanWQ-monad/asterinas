@@ -19,5 +19,7 @@ in stdenv.mkDerivation rec {
   installPhase = ''
     make TARGET_DIR=$out
   '';
+
   dontPatchShebangs = true;
+  dontStrip = true;
 }

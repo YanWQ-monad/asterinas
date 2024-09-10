@@ -47,7 +47,7 @@ in makeInitrdNG {
       "/ext2/.keep".text = "/ext2 mount point";
       "/exfat/.keep".text = "/exfat mount point";
 
-      # Required Directories
+      # Required Directories and Files
       "/tmp/.keep".text = "/tmp directory";
       "/usr/bin/busybox".source = "${initrdBinEnv}/bin/busybox";
 

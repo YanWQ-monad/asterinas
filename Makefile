@@ -102,7 +102,7 @@ CARGO_OSDK_ARGS += --qemu-args="-accel kvm"
 endif
 
 ifdef PREBUILT_INITRAMFS
-INITRAMFS_IMAGE := $(shell pwd)/$(PREBUILT_INITRAMFS)
+INITRAMFS_IMAGE := $(shell realpath $(PREBUILT_INITRAMFS))
 CARGO_OSDK_ARGS += --initramfs="$(INITRAMFS_IMAGE)"
 endif
 
