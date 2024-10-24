@@ -3,7 +3,7 @@
 , fetchFromGitHub
 , callPackage
 , makeWrapper
-, glibc, libgcc
+, glibc
 }:
 stdenv.mkDerivation rec {
   name = "initrd-apps";
@@ -16,7 +16,7 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-9XHUE8SVOG/X7SIB52C8EImPx4XZ7B/5Ojwmb0PkiuI";
   };
 
-  buildInputs = [ glibc glibc.static libgcc ];
+  buildInputs = [ glibc glibc.static ];
 
   enableParallelBuilding = true;
 
