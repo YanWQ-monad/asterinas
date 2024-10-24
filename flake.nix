@@ -8,7 +8,7 @@
 
   outputs = { self, nixpkgs, rust-overlay }:
     let
-      supportedSystems = [ "x86_64-linux" ];
+      supportedSystems = [ "x86_64-linux" "riscv64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
       overlays = [ (import rust-overlay) ];
       nixpkgsFor = forAllSystems (system: import nixpkgs {
@@ -26,7 +26,15 @@
           gvisor-syscall-tests-all = pkgs.callPackage ./test/syscall_test/all.nix { };
           gvisor-syscall-tests = pkgs.callPackage ./test/syscall_test/default.nix { inherit gvisor-syscall-tests-all; };
           test-apps = pkgs.callPackage ./test/apps/default.nix { };
-          initrd = pkgs.callPackage ./test/initrd.nix { inherit membench lmbench test-apps gvisor-syscall-tests; };
+
+          initrd = let
+            build-initrd = system: pkgs: pkgs.callPackage ./test/initrd.nix {
+              inherit (self.packages.${system}) membench lmbench test-apps gvisor-syscall-tests;
+            };
+          in {
+            x86 = build-initrd "x86_64-linux" pkgs;
+            riscv64 = build-initrd "riscv64-linux" pkgs.pkgsCross.riscv64.pkgsStatic;
+          };
 
           rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           rustPlatform = pkgs.makeRustPlatform {
@@ -38,6 +46,7 @@
           typos = pkgs.typos.override { inherit rustPlatform; };
 
           _cache = pkgs.mkShell {
+            buildInputs = [ pkgs.pkgsCross.riscv64.pkgsStatic.stdenv ];
             packages = with pkgs; [
               # cargo packages
               cargo-binutils typos
@@ -55,8 +64,9 @@
       devShells = forAllSystems (system: let
         pkgs = nixpkgsFor.${system};
         pkgsFlake = self.packages.${system};
-      in {
-        default = pkgs.mkShell {
+      in pkgs.lib.genAttrs
+        [ "x86" "riscv64" ]
+        (arch: pkgs.mkShell {
           packages = [
             # Rust Toolchain
             pkgsFlake.rustToolchain
@@ -75,9 +85,9 @@
 
           shellHook = ''
             export OVMF_PATH=${pkgs.OVMF.fd}/FV
-            export PREBUILT_INITRAMFS=${pkgsFlake.initrd}/initrd.gz
+            export PREBUILT_INITRAMFS=${pkgsFlake.initrd.${arch}}/initrd.gz
           '';
-        };
-      });
+        })
+      );
     };
 }

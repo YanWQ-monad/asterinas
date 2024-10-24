@@ -1,4 +1,5 @@
 { lib
+, system
 , busybox
 , sysbench, iperf, unixbench, iozone, fio
 , membench, lmbench, test-apps, gvisor-syscall-tests
@@ -52,6 +53,7 @@ makeInitrdNG {
       "/etc".source = ./etc;
       "/lib/x86_64-linux-gnu/vdso64.so".source = vdso;
 
+    } // lib.optionalAttrs (system == "x86_64-linux") {
       # Test Files
       "/opt/syscall_test".source = gvisor-syscall-tests;
       "/benchmark/bin".source = "${benchmarkBinEnv}/bin";
