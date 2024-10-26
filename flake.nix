@@ -55,10 +55,7 @@
               gvisor-syscall-tests-all
               membench lmbench iozone
 
-              (grub2.override { efiSupport = true; })
-
-              # RISC-V toolchain
-              pkgs.pkgsCross.riscv64.pkgsStatic.stdenv
+              test-apps
             ];
           };
         }

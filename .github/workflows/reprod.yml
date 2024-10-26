@@ -1,0 +1,30 @@
+name: Test Asterinas
+
+on:
+  pull_request:
+  push:
+    branches:
+      - flake4
+
+jobs:
+  nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v28
+
+      - name: Try Restore Nix Store Cache
+        id: nix-cache-restore
+        uses: nix-community/cache-nix-action@v5.1.0
+        with:
+          # Use commit SHA to make `primary-key` change every time
+          primary-key: nix-cache-test-${{ github.sha }}
+          restore-prefixes-first-match: nix-cache-test-
+
+      - name: Mutate package
+        run: echo "// $RANDOM" >> test/apps/clone3/clone_exit_signal.c
+
+      - name: Build Nix Cache
+        run: nix build .#_cache -L
