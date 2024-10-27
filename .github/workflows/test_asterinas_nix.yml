@@ -64,6 +64,7 @@ jobs:
       - name: Setup Environment using Nix
         uses: rrbutani/use-nix-shell-action@v1
         with:
+          devShell: .#riscv64
           extraNixOptions: "-L"
 
       - name: Check
@@ -92,6 +93,7 @@ jobs:
       - name: Setup Environment using Nix
         uses: rrbutani/use-nix-shell-action@v1
         with:
+          devShell: .#riscv64
           extraNixOptions: "-L"
 
       - name: Usermode Unit test
@@ -158,6 +160,44 @@ jobs:
       - name: Setup Environment using Nix
         uses: rrbutani/use-nix-shell-action@v1
         with:
+          devShell: .#x86
+          extraNixOptions: "-L"
+
+      - name: ${{ matrix.test.name }}
+        run: ${{ matrix.test.run }}
+
+  integration-test-riscv:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    needs: nix-cache
+    name: integration-test (RISC-V) (${{ matrix.test.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        test:
+          - name: Boot Test
+            run: make run ARCH=riscv64 AUTO_TEST=boot ENABLE_KVM=0 SCHEME=riscv RELEASE=1
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v28
+
+      - name: Restore Nix Store Cache
+        uses: nix-community/cache-nix-action@v5.1.0
+        with:
+          primary-key: "nix-cache-dummy"
+          restore-prefixes-first-match: nix-cache-${{ runner.os }}-
+          fail-on: first-match.miss
+          save: false
+
+      - name: Setup Environment using Nix
+        uses: rrbutani/use-nix-shell-action@v1
+        with:
+          devShell: .#riscv64
           extraNixOptions: "-L"
 
       - name: ${{ matrix.test.name }}
