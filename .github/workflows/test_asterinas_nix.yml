@@ -29,9 +29,10 @@ jobs:
 
       - name: Try Restore Nix Store Cache
         id: nix-cache-restore
-        uses: nix-community/cache-nix-action@v5.1.0
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: nix-cache-${{ runner.os }}-${{ steps.calc-cache-key.outputs.key }}
+          restore-prefixes-first-match: nix-cache-${{ runner.os }}-
           purge-prefixes: nix-cache-${{ runner.os }}-
           skip-restore-on-hit-primary-key: true
 
@@ -62,7 +63,7 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v28
 
       - name: Restore Nix Store Cache
-        uses: nix-community/cache-nix-action@v5.1.0
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: "nix-cache-dummy"
           restore-prefixes-first-match: nix-cache-${{ runner.os }}-
@@ -102,7 +103,7 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v28
 
       - name: Restore Nix Store Cache
-        uses: nix-community/cache-nix-action@v5.1.0
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: "nix-cache-dummy"
           restore-prefixes-first-match: nix-cache-${{ runner.os }}-
@@ -169,7 +170,7 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v28
 
       - name: Restore Nix Store Cache
-        uses: nix-community/cache-nix-action@v5.1.0
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: "nix-cache-dummy"
           restore-prefixes-first-match: nix-cache-${{ runner.os }}-
@@ -206,7 +207,7 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v28
 
       - name: Restore Nix Store Cache
-        uses: nix-community/cache-nix-action@v5.1.0
+        uses: nix-community/cache-nix-action@v6
         with:
           primary-key: "nix-cache-dummy"
           restore-prefixes-first-match: nix-cache-${{ runner.os }}-
